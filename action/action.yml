@@ -1,0 +1,33 @@
+name: halflife
+description: Comment on a pull request with the claims in your docs that have gone stale.
+inputs:
+  files:
+    description: Space-separated list of markdown files to check.
+    required: true
+  nebius_api_key:
+    description: Nebius Token Factory API key.
+    required: true
+  tavily_api_key:
+    description: Tavily API key.
+    required: true
+  github_token:
+    description: Token used to post the comment. Defaults to the workflow token.
+    default: ${{ github.token }}
+  max_claims:
+    description: Cap on claims per file, to protect your credits.
+    default: "60"
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    - shell: bash
+      run: pip install "${{ github.action_path }}/.."
+    - shell: bash
+      env:
+        NEBIUS_API_KEY: ${{ inputs.nebius_api_key }}
+        TAVILY_API_KEY: ${{ inputs.tavily_api_key }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        HALFLIFE_MAX_CLAIMS: ${{ inputs.max_claims }}
+      run: python "${{ github.action_path }}/entrypoint.py" ${{ inputs.files }}
