@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>halflife</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F3F5F4;
+    --ink: #182320;
+    --muted: #66726E;
+    --rule: #D6DCDA;
+    --fresh: #1F8A5B;
+    --drifted: #D4900F;
+    --rotted: #C9382A;
+    --unverified: #8C979C;
+    --sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", "SFMono-Regular", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.5; }
+  a { color: inherit; }
+  button, textarea, input { font: inherit; color: inherit; }
+
+  .page { max-width: 1180px; margin: 0 auto; padding: 28px 20px 60px; }
+
+  header { display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap; padding-bottom: 14px; border-bottom: 1px solid var(--rule); }
+  .wordmark { font-family: var(--mono); font-weight: 500; font-size: 22px; letter-spacing: -0.01em; }
+  .tagline { color: var(--muted); }
+
+  .input { margin-top: 22px; display: grid; gap: 10px; }
+  textarea {
+    width: 100%; min-height: 120px; resize: vertical; padding: 12px 14px;
+    background: #fff; border: 1px solid var(--rule); border-radius: 6px; font-family: var(--mono); font-size: 13px;
+  }
+  textarea:focus, button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  button {
+    padding: 9px 16px; border-radius: 6px; border: 1px solid var(--ink); background: var(--ink); color: var(--paper); cursor: pointer;
+  }
+  button.quiet { background: transparent; color: var(--ink); }
+  button[disabled] { opacity: .45; cursor: default; }
+  .status { margin-left: auto; font-family: var(--mono); font-size: 13px; color: var(--muted); }
+  .status strong { color: var(--ink); font-weight: 500; }
+
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 18px; font-family: var(--mono); font-size: 13px; }
+  .legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 7px; vertical-align: 0; background: var(--c); }
+
+  .stage { display: grid; grid-template-columns: minmax(0, 3fr) minmax(280px, 2fr); gap: 24px; margin-top: 14px; align-items: start; }
+  .swarm { position: relative; width: 100%; aspect-ratio: 1 / 1; border: 1px solid var(--rule); border-radius: 6px; background: #fff; overflow: hidden; }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .swarm .empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); text-align: center; padding: 20px; }
+
+  .claims { max-height: 640px; overflow: auto; border-top: 1px solid var(--rule); }
+  .claim { display: grid; grid-template-columns: 12px 1fr; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--rule); }
+  .claim .dot { width: 9px; height: 9px; border-radius: 50%; margin-top: 7px; background: var(--c); }
+  .claim .text { font-family: var(--mono); font-size: 13px; }
+  .claim .note { color: var(--muted); font-size: 13.5px; margin-top: 2px; }
+  .claim .note a { color: var(--muted); }
+  .claim.pending .dot { background: transparent; border: 1.5px solid var(--unverified); }
+
+  .doc { margin-top: 36px; display: none; }
+  .doc h2 { font-size: 15px; font-weight: 600; margin: 0 0 10px; }
+  .doc pre { white-space: pre-wrap; word-break: break-word; font-family: var(--mono); font-size: 13px; line-height: 1.6; background: #fff; border: 1px solid var(--rule); border-radius: 6px; padding: 16px; }
+  mark { background: transparent; color: inherit; border-bottom: 2px solid var(--c); padding-bottom: 1px; }
+  mark.fresh { --c: var(--fresh); } mark.drifted { --c: var(--drifted); } mark.rotted { --c: var(--rotted); } mark.unverified { --c: var(--unverified); }
+
+  .error { margin-top: 12px; color: var(--rotted); }
+
+  @media (max-width: 760px) {
+    .stage { grid-template-columns: 1fr; }
+    .claims { max-height: none; }
+    .status { margin-left: 0; width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div class="wordmark">halflife</div>
+    <div class="tagline">Every document decays. Find out how much.</div>
+  </header>
+
+  <section class="input">
+    <textarea id="src" placeholder="Paste a README, tutorial or onboarding doc, or a URL."></textarea>
+    <div class="controls">
+      <button id="verify">Verify</button>
+      <button id="demo" class="quiet" hidden>Run the demo</button>
+      <div class="status" id="status">Nothing checked yet</div>
+    </div>
+    <div class="error" id="error" hidden></div>
+  </section>
+
+  <div class="legend">
+    <span style="--c: var(--fresh)">still true <b id="n-fresh">0</b></span>
+    <span style="--c: var(--drifted)">drifted <b id="n-drifted">0</b></span>
+    <span style="--c: var(--rotted)">rotted <b id="n-rotted">0</b></span>
+    <span style="--c: var(--unverified)">unverified <b id="n-unverified">0</b></span>
+  </div>
+
+  <section class="stage">
+    <div class="swarm">
+      <canvas id="canvas"></canvas>
+      <div class="empty" id="empty">Each claim becomes a node. Each search is a probe. Verdicts colour the nodes as they land.</div>
+    </div>
+    <div class="claims" id="claims"></div>
+  </section>
+
+  <section class="doc" id="doc">
+    <h2>Annotated document</h2>
+    <pre id="docbody"></pre>
+  </section>
+</div>
+
+<script>
+(() => {
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const COLOR = { fresh: css('--fresh'), drifted: css('--drifted'), rotted: css('--rotted'), unverified: css('--unverified'), ink: css('--ink'), rule: css('--rule') };
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const $ = (id) => document.getElementById(id);
+  const canvas = $('canvas'), ctx = canvas.getContext('2d');
+  const claimsEl = $('claims'), statusEl = $('status'), errorEl = $('error');
+
+  let state = null;   // { claims: Map, probes: [], doc, done }
+  let es = null;
+
+  function resize() {
+    const r = canvas.getBoundingClientRect(), dpr = devicePixelRatio || 1;
+    canvas.width = r.width * dpr; canvas.height = r.height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  addEventListener('resize', resize); resize();
+
+  // Vogel spiral: n points spread evenly in a disc, index-ordered from the centre outwards.
+  function place(i, n, w, h) {
+    const cx = w / 2, cy = h / 2, R = Math.min(w, h) / 2 - 18;
+    const r = R * Math.sqrt((i + 0.5) / Math.max(n, 1));
+    const a = i * 2.39996; // golden angle
+    return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+  }
+
+  function draw(now) {
+    const w = canvas.getBoundingClientRect().width, h = canvas.getBoundingClientRect().height;
+    ctx.clearRect(0, 0, w, h);
+    if (!state) { requestAnimationFrame(draw); return; }
+    const n = state.claims.size, cx = w / 2, cy = h / 2;
+
+    // Settled links first, under everything.
+    for (const c of state.claims.values()) {
+      const p = place(c.id, n, w, h);
+      if (c.status) {
+        ctx.strokeStyle = COLOR[c.status]; ctx.globalAlpha = 0.35; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.globalAlpha = 1;
+      }
+    }
+    // Probes in flight.
+    const FLIGHT = reduced ? 1 : 650;
+    for (const pr of state.probes) {
+      const c = state.claims.get(pr.id); if (!c) continue;
+      const p = place(c.id, n, w, h);
+      const t = Math.min(1, (now - pr.at) / FLIGHT), e = 1 - Math.pow(1 - t, 3);
+      const x = cx + (p.x - cx) * e, y = cy + (p.y - cy) * e;
+      ctx.strokeStyle = COLOR.ink; ctx.globalAlpha = 0.18; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(x, y); ctx.stroke(); ctx.globalAlpha = 1;
+      ctx.fillStyle = COLOR.ink; ctx.beginPath(); ctx.arc(x, y, 2.2, 0, Math.PI * 2); ctx.fill();
+      if (t >= 1 && !c.status) { // waiting on the judge: breathe
+        const k = 0.5 + 0.5 * Math.sin(now / 260 + c.id);
+        ctx.strokeStyle = COLOR.ink; ctx.globalAlpha = 0.25 + 0.35 * k;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 5 + 3 * k, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1;
+      }
+    }
+    // Nodes.
+    for (const c of state.claims.values()) {
+      const p = place(c.id, n, w, h);
+      ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+      if (c.status) { ctx.fillStyle = COLOR[c.status]; ctx.fill(); }
+      else { ctx.strokeStyle = COLOR.unverified; ctx.lineWidth = 1.2; ctx.stroke(); }
+    }
+    // Document node.
+    ctx.fillStyle = COLOR.ink; ctx.beginPath(); ctx.arc(cx, cy, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = COLOR.ink; ctx.globalAlpha = 0.25; ctx.beginPath(); ctx.arc(cx, cy, 12, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1;
+
+    state.probes = state.probes.filter(pr => !state.claims.get(pr.id)?.status || now - pr.at < FLIGHT);
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+
+  function counts() {
+    const c = { fresh: 0, drifted: 0, rotted: 0, unverified: 0 };
+    for (const cl of state.claims.values()) if (cl.status) c[cl.status]++;
+    return c;
+  }
+  function updateStatus(text) {
+    const c = counts(); for (const k in c) $('n-' + k).textContent = c[k];
+    const done = c.fresh + c.drifted + c.rotted + c.unverified;
+    statusEl.innerHTML = text || `<strong>${done}</strong> of ${state.claims.size} checked`;
+  }
+
+  function claimRow(c) {
+    const el = document.createElement('div');
+    el.className = 'claim pending'; el.id = 'claim-' + c.id;
+    el.innerHTML = `<div class="dot"></div><div><div class="text"></div><div class="note">searching</div></div>`;
+    el.querySelector('.text').textContent = c.text;
+    return el;
+  }
+  function settle(id, v) {
+    const el = $('claim-' + id); if (!el) return;
+    el.classList.remove('pending'); el.style.setProperty('--c', COLOR[v.status]);
+    const note = el.querySelector('.note'); note.textContent = v.note || v.status;
+    if (v.source_url) { const a = document.createElement('a'); a.href = v.source_url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'source'; note.append(' · ', a); }
+    if (v.status !== 'fresh') claimsEl.prepend(el); // changed things rise to the top
+  }
+
+  function renderDoc() {
+    if (!state.doc) return;
+    const located = [...state.claims.values()].filter(c => c.start != null && c.status).sort((a, b) => a.start - b.start);
+    const pre = $('docbody'); pre.textContent = '';
+    let cursor = 0;
+    for (const c of located) {
+      if (c.start < cursor) continue;
+      pre.append(state.doc.slice(cursor, c.start));
+      const m = document.createElement('mark'); m.className = c.status; m.title = c.note || c.status; m.textContent = state.doc.slice(c.start, c.end);
+      pre.append(m); cursor = c.end;
+    }
+    pre.append(state.doc.slice(cursor));
+    $('doc').style.display = 'block';
+  }
+
+  function handle(ev) {
+    switch (ev.type) {
+      case 'started': updateStatus('Reading the document'); break;
+      case 'claims': updateStatus(`<strong>${ev.count}</strong> checkable claims`); break;
+      case 'claim': state.claims.set(ev.claim.id, { ...ev.claim, status: null }); claimsEl.append(claimRow(ev.claim)); $('empty').hidden = true; break;
+      case 'probe': state.probes.push({ id: ev.id, at: performance.now() }); break;
+      case 'verdict': { const c = state.claims.get(ev.id); if (c) Object.assign(c, ev.verdict); settle(ev.id, ev.verdict); updateStatus(); break; }
+      case 'done': { const f = ev.summary.freshness; updateStatus(`freshness <strong>${f == null ? 'n/a' : Math.round(f * 100) + '%'}</strong> · ${state.claims.size} claims`); renderDoc(); finish(); break; }
+      case 'error': errorEl.textContent = ev.message; errorEl.hidden = false; finish(); break;
+    }
+  }
+
+  function finish() { if (es) { es.close(); es = null; } $('verify').disabled = false; $('demo').disabled = false; }
+
+  async function start(path, body) {
+    if (es) es.close();
+    errorEl.hidden = true; claimsEl.textContent = ''; $('doc').style.display = 'none';
+    $('verify').disabled = true; $('demo').disabled = true;
+    const res = await fetch(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+    if (!res.ok) { errorEl.textContent = (await res.json()).detail || res.statusText; errorEl.hidden = false; finish(); return; }
+    const { id, doc } = await res.json();
+    state = { claims: new Map(), probes: [], doc, done: false };
+    updateStatus('Reading the document');
+    es = new EventSource(`/api/runs/${id}/events`);
+    es.onmessage = (m) => handle(JSON.parse(m.data));
+    es.addEventListener('end', finish);
+    es.onerror = () => { if (es) { errorEl.textContent = 'Lost the connection to the server.'; errorEl.hidden = false; finish(); } };
+  }
+
+  $('verify').addEventListener('click', () => {
+    const v = $('src').value.trim(); if (!v) { $('src').focus(); return; }
+    start('/api/runs', /^https?:\/\//.test(v) ? { url: v } : { text: v });
+  });
+  $('demo').addEventListener('click', () => start('/api/runs/replay?speed=1'));
+
+  fetch('/api/config').then(r => r.json()).then(c => { if (c.replay_available) $('demo').hidden = false; }).catch(() => {});
+})();
+</script>
+</body>
+</html>
