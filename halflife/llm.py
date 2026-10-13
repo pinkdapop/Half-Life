@@ -47,16 +47,19 @@ async def chat_json(
     system: str,
     user: str,
     *,
+    model: str | None = None,
     temperature: float = 0.0,
     max_tokens: int = 4000,
     retries: int = 3,
 ) -> dict[str, Any]:
-    """Send a prompt that asks for JSON and return the parsed object."""
+    """Send a prompt that asks for JSON and return the parsed object.
+
+    `model` overrides the default (used to escalate hard verdicts to a bigger Nemotron)."""
     last_error: Exception | None = None
     for attempt in range(retries):
         try:
             kwargs: dict[str, Any] = dict(
-                model=settings.nemotron_model,
+                model=model or settings.nemotron_model,
                 messages=[
                     {"role": "system", "content": system},
                     {"role": "user", "content": user},

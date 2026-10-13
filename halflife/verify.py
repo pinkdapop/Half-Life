@@ -7,6 +7,7 @@ from datetime import date
 from typing import Any
 
 from .claims import Claim
+from .config import settings
 from .llm import chat_json
 
 STATUSES = ("fresh", "drifted", "rotted", "unverified")
@@ -52,6 +53,7 @@ class Verdict:
     source_url: str | None
     note: str
     cached: bool
+    model: str = ""
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -67,11 +69,8 @@ def _format_sources(sources: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
-async def judge(claim: Claim, sources: list[dict[str, Any]], cached: bool) -> Verdict:
-    if not sources:
-        return Verdict(claim.id, "unverified", 0.0, "", None, "No search results.", cached)
-
-    data = await chat_json(
+async def _ask(claim: Claim, sources: list[dict[str, Any]], model: str | None) -> dict[str, Any]:
+    return await chat_json(
         SYSTEM,
         USER_TEMPLATE.format(
             today=date.today().isoformat(),
@@ -79,8 +78,26 @@ async def judge(claim: Claim, sources: list[dict[str, Any]], cached: bool) -> Ve
             kind=claim.kind,
             sources=_format_sources(sources),
         ),
+        model=model,
         max_tokens=600,
     )
+
+
+async def judge(claim: Claim, sources: list[dict[str, Any]], cached: bool) -> Verdict:
+    if not sources:
+        return Verdict(claim.id, "unverified", 0.0, "", None, "No search results.", cached)
+
+    model = settings.nemotron_model
+    data = await _ask(claim, sources, None)
+
+    # Nano does the everyday calls; escalate only the verdicts it is unsure about.
+    try:
+        first_confidence = float(data.get("confidence", 0.0))
+    except (TypeError, ValueError):
+        first_confidence = 0.0
+    if settings.escalate_model and first_confidence < settings.escalate_below:
+        data = await _ask(claim, sources, settings.escalate_model)
+        model = settings.escalate_model
 
     status = data.get("status") if data.get("status") in STATUSES else "unverified"
     try:
@@ -101,4 +118,5 @@ async def judge(claim: Claim, sources: list[dict[str, Any]], cached: bool) -> Ve
         source_url=source_url,
         note=str(data.get("note", "") or ""),
         cached=cached,
+        model=model,
     )
