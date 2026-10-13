@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import time
 import uuid
 from collections.abc import AsyncIterator
 from pathlib import Path
@@ -14,6 +15,7 @@ from pydantic import BaseModel
 
 from .. import pipeline
 from ..cli import load_text
+from ..config import settings
 
 STATIC = Path(__file__).parent / "static"
 
@@ -27,6 +29,18 @@ class RunRequest(BaseModel):
 def create_app(replay_path: str | None = None) -> FastAPI:
     app = FastAPI(title="halflife")
     runs: dict[str, asyncio.Queue] = {}
+    live_starts: list[float] = []  # timestamps of live runs, for the public-demo guard
+
+    def guard() -> int | None:
+        """In public-demo mode: cap claims and rate-limit live runs. Returns the claim cap."""
+        if not settings.public_demo:
+            return None
+        now = time.time()
+        live_starts[:] = [t for t in live_starts if now - t < 3600]
+        if len(live_starts) >= settings.demo_runs_per_hour:
+            raise HTTPException(429, "The public demo has used its hourly budget. Try the recorded run, or come back in a bit.")
+        live_starts.append(now)
+        return settings.demo_max_claims
 
     async def pump(run_id: str, events: AsyncIterator[dict]) -> None:
         queue = runs[run_id]
@@ -50,7 +64,8 @@ def create_app(replay_path: str | None = None) -> FastAPI:
 
     @app.get("/api/config")
     async def config() -> dict:
-        return {"replay_available": bool(replay_path)}
+        return {"replay_available": bool(replay_path), "public_demo": settings.public_demo,
+                "demo_max_claims": settings.demo_max_claims if settings.public_demo else None}
 
     @app.post("/api/runs")
     async def create_run(req: RunRequest) -> dict:
@@ -60,7 +75,9 @@ def create_app(replay_path: str | None = None) -> FastAPI:
             doc, source = req.text, "paste"
         else:
             raise HTTPException(400, "Paste some text or give a URL.")
-        return {"id": start(pipeline.run(doc, source=source, max_claims=req.max_claims)), "doc": doc}
+        cap = guard()
+        max_claims = min(req.max_claims or cap or 10**9, cap or 10**9) if cap else req.max_claims
+        return {"id": start(pipeline.run(doc, source=source, max_claims=max_claims)), "doc": doc}
 
     @app.post("/api/runs/replay")
     async def create_replay(speed: float = 1.0) -> dict:
