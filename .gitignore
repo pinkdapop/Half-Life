@@ -1,0 +1,11 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.halflife-cache/
+runs/
+report.md
+report.json
+.pytest_cache/
+dist/
+*.egg-info/

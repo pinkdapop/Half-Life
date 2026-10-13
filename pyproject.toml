@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "halflife"
+version = "0.1.0"
+description = "Find out how much a document has decayed: every checkable claim verified against the live web."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+  "openai>=1.40",
+  "tavily-python>=0.5",
+  "httpx>=0.27",
+  "python-dotenv>=1.0",
+  "fastapi>=0.110",
+  "uvicorn>=0.29",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-asyncio>=0.23"]
+
+[project.scripts]
+halflife = "halflife.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["halflife*"]
+
+[tool.setuptools.package-data]
+"halflife.web" = ["static/*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
