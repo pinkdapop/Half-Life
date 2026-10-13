@@ -1,0 +1,286 @@
+{
+  "as_of": "2026-10",
+  "items": [
+    {
+      "text": "Python 3.8 still receives security updates from the Python core team.",
+      "expect": [
+        "rotted"
+      ],
+      "truth": "Python 3.8 reached end of life on 2024-10-07."
+    },
+    {
+      "text": "Python 3.9 still receives security fixes.",
+      "expect": [
+        "rotted"
+      ],
+      "truth": "Python 3.9 reached end of life in October 2025."
+    },
+    {
+      "text": "Node.js 16 is an active LTS release.",
+      "expect": [
+        "rotted"
+      ],
+      "truth": "Node.js 16 reached end of life on 2023-09-11."
+    },
+    {
+      "text": "Node.js 18 is still in maintenance LTS.",
+      "expect": [
+        "rotted"
+      ],
+      "truth": "Node.js 18 reached end of life on 2025-04-30."
+    },
+    {
+      "text": "Node.js 20 is still supported by the Node.js project.",
+      "expect": [
+        "rotted"
+      ],
+      "truth": "Node.js 20 reached end of life on 2026-04-30."
+    },
+    {
+      "text": "Heroku offers free dynos for hobby projects.",
+      "expect": [
+        "rotted"
+      ],
+      "truth": "Heroku removed free dynos on 2022-11-28."
+    },
+    {
+      "text": "GitHub Actions still provides the ubuntu-20.04 hosted runner image.",
+      "expect": [
+        "rotted"
+      ],
+      "truth": "The ubuntu-20.04 runner image was retired in April 2025."
+    },
+    {
+      "text": "CentOS Linux 8 is a supported distribution.",
+      "expect": [
+        "rotted"
+      ],
+      "truth": "CentOS Linux 8 reached end of life on 2021-12-31."
+    },
+    {
+      "text": "Create React App is the recommended way to start a new React project.",
+      "expect": [
+        "rotted"
+      ],
+      "truth": "Create React App was deprecated on 2025-02-14; React docs recommend frameworks or Vite."
+    },
+    {
+      "text": "Django 3.2 is still under extended support.",
+      "expect": [
+        "rotted"
+      ],
+      "truth": "Django 3.2 extended support ended in April 2024."
+    },
+    {
+      "text": "Django 4.2 LTS is still under extended support.",
+      "expect": [
+        "rotted"
+      ],
+      "truth": "Django 4.2 LTS extended support ended in April 2026."
+    },
+    {
+      "text": "The request npm package is actively maintained.",
+      "expect": [
+        "rotted"
+      ],
+      "truth": "request was deprecated in February 2020."
+    },
+    {
+      "text": "Rust's newest edition is the 2021 edition.",
+      "expect": [
+        "rotted"
+      ],
+      "truth": "The Rust 2024 edition was stabilised in Rust 1.85 (February 2025)."
+    },
+    {
+      "text": "Ruby 3.0 is still supported with security fixes.",
+      "expect": [
+        "rotted"
+      ],
+      "truth": "Ruby 3.0 reached end of life on 2024-04-23."
+    },
+    {
+      "text": "PHP 8.0 still receives security updates.",
+      "expect": [
+        "rotted"
+      ],
+      "truth": "PHP 8.0 reached end of life on 2023-11-26."
+    },
+    {
+      "text": "Bootstrap 4 still receives bug fixes.",
+      "expect": [
+        "rotted"
+      ],
+      "truth": "Bootstrap 4 reached end of life on 2023-01-01."
+    },
+    {
+      "text": "AngularJS 1.x receives long-term support from Google.",
+      "expect": [
+        "rotted"
+      ],
+      "truth": "AngularJS long-term support ended on 2021-12-31."
+    },
+    {
+      "text": "Google Domains is accepting new domain registrations.",
+      "expect": [
+        "rotted"
+      ],
+      "truth": "Google Domains was sold to Squarespace in 2023 and migrations completed in 2024."
+    },
+    {
+      "text": "Debian 12 (bookworm) is the current stable release.",
+      "expect": [
+        "rotted",
+        "drifted"
+      ],
+      "truth": "Debian 13 (trixie) became stable on 2025-08-09; bookworm is oldstable."
+    },
+    {
+      "text": "Docker Desktop is free for every company regardless of size.",
+      "expect": [
+        "rotted"
+      ],
+      "truth": "Since 2021-08-31 larger companies need a paid subscription."
+    },
+    {
+      "text": "The latest Ubuntu LTS release is 22.04.",
+      "expect": [
+        "drifted",
+        "rotted"
+      ],
+      "truth": "Ubuntu 24.04 LTS (April 2024) and 26.04 LTS (April 2026) have since shipped; 22.04 remains supported."
+    },
+    {
+      "text": "The latest Python release series is 3.12.",
+      "expect": [
+        "drifted",
+        "rotted"
+      ],
+      "truth": "Python 3.13 (Oct 2024) and 3.14 (Oct 2025) have since been released."
+    },
+    {
+      "text": "React's latest major version is 18.",
+      "expect": [
+        "drifted",
+        "rotted"
+      ],
+      "truth": "React 19 was released in December 2024."
+    },
+    {
+      "text": "Django's latest long-term support release is 4.2.",
+      "expect": [
+        "drifted",
+        "rotted"
+      ],
+      "truth": "Django 5.2 LTS was released in April 2025."
+    },
+    {
+      "text": "Redis is licensed under the three-clause BSD license.",
+      "expect": [
+        "rotted",
+        "drifted"
+      ],
+      "truth": "Redis moved to RSALv2/SSPL in March 2024 and added AGPLv3 with Redis 8 in May 2025."
+    },
+    {
+      "text": "Ubuntu 20.04 LTS is within its standard five-year support window.",
+      "expect": [
+        "rotted",
+        "drifted"
+      ],
+      "truth": "Standard support ended 2025-05-31; only Expanded Security Maintenance continues."
+    },
+    {
+      "text": "Moment.js is actively developed and recommended for new projects.",
+      "expect": [
+        "rotted",
+        "drifted"
+      ],
+      "truth": "Moment.js has been in maintenance mode since September 2020 and its own docs discourage new use."
+    },
+    {
+      "text": "Python 3.12 receives security fixes until October 2028.",
+      "expect": [
+        "fresh"
+      ],
+      "truth": "Correct per the Python release schedule."
+    },
+    {
+      "text": "Python 3.11 is supported until October 2027.",
+      "expect": [
+        "fresh"
+      ],
+      "truth": "Correct per the Python release schedule."
+    },
+    {
+      "text": "Node.js 22 is a Long Term Support release.",
+      "expect": [
+        "fresh"
+      ],
+      "truth": "Node.js 22 entered LTS in October 2024 and is supported until April 2027."
+    },
+    {
+      "text": "Ubuntu 24.04 LTS is supported until 2029.",
+      "expect": [
+        "fresh"
+      ],
+      "truth": "Standard support runs to April 2029."
+    },
+    {
+      "text": "GitHub Actions is free to use on public repositories.",
+      "expect": [
+        "fresh"
+      ],
+      "truth": "Standard GitHub-hosted runners are free for public repositories."
+    },
+    {
+      "text": "Python 2 reached end of life in January 2020.",
+      "expect": [
+        "fresh"
+      ],
+      "truth": "Python 2.7 end of life was 2020-01-01."
+    },
+    {
+      "text": "Express 5 requires Node.js 18 or later.",
+      "expect": [
+        "fresh"
+      ],
+      "truth": "Express 5.0 dropped support for Node.js below 18."
+    },
+    {
+      "text": "Debian 13 (trixie) is the current stable release.",
+      "expect": [
+        "fresh"
+      ],
+      "truth": "Released 2025-08-09."
+    },
+    {
+      "text": "Django 5.2 is a long-term support release.",
+      "expect": [
+        "fresh"
+      ],
+      "truth": "Django 5.2 LTS, April 2025, supported until April 2028."
+    },
+    {
+      "text": "The Linux kernel is licensed under GPLv2.",
+      "expect": [
+        "fresh"
+      ],
+      "truth": "Unchanged."
+    },
+    {
+      "text": "Homebrew is available for both macOS and Linux.",
+      "expect": [
+        "fresh"
+      ],
+      "truth": "Unchanged."
+    },
+    {
+      "text": "Rust publishes a new stable release every six weeks.",
+      "expect": [
+        "fresh"
+      ],
+      "truth": "Unchanged release cadence."
+    }
+  ]
+}
