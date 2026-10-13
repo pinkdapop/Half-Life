@@ -21,7 +21,25 @@ The problem is real and simple: every judge has lost an afternoon to a setup gui
 - The builder is **solo**, no hardware, building with AI assistance. Goal is **first place**. That means: one sharp feature done flawlessly, a convincing 2-minute video, a clean repo with real commit history. Not a platform.
 - Credits come from the Nebius Builder Program (https://dev.nebius.com/builders): $50 Token Factory, $50 AI Cloud, $25 Tavily. **Tavily credits are the scarce resource.** A 200-claim run is 200+ searches.
 
-Check the Devpost submission form for the exact fields and video requirements before Oct 28; don't assume.
+### Official rules, verified Oct 13 at nebiusglobalaihackathon.devpost.com/rules
+
+Submission must include, or it fails Stage One (pass/fail) before anyone looks at quality:
+- **A URL to a working, hosted demo.** Not optional. Judges may test it. The hosted instance runs with `HALFLIFE_PUBLIC_DEMO=1` so visitors can't drain credits (claims capped at 40/run, 20 live runs/hour, recorded run always available). Deploying on Nebius AI Cloud is encouraged by the track text, not required; any host is fine.
+- **Public repo** on GitHub/GitLab/Bitbucket with an open-source license file that GitHub detects and shows in the About section. Our MIT LICENSE is standard text; confirm "MIT license" appears in the repo's About box after the first push.
+- **README with setup instructions**, and it must highlight how Nemotron is used and where Token Factory accelerated the workflow and any other Nebius services.
+- **Demo video under 3 minutes, on YouTube, public.** No third-party trademarks, no copyrighted music. Must show the project actually running.
+- A text description of features and functionality.
+- The track you're submitting to (we say Best Apps and Agents).
+- **A feedback section** on Token Factory / AI Cloud / NVIDIA tools. There's a separate $100 + swag prize for the 10 most valuable feedback writeups, so write real feedback, not filler.
+- "Runs on Token Factory" is defined as making a runtime call to the Token Factory inference API. We do.
+
+Prize stacking: each project can win one Overall award OR one Track award, plus one Bonus award. So Grand Prize + Best Use of Tavily ($3K, requires a functional runtime Tavily call) is the maximum take, and both are in reach for this project.
+
+Judging, four equally weighted criteria: Technological Implementation (how well built, how effectively it uses Token Factory + Nemotron), Design (a complete coherent product, not a proof of concept), Potential Impact (credible specific case for a real problem for a real audience), Quality of the Idea (creative, non-obvious use; genuine understanding of the problem). Build and write to all four explicitly.
+
+The Best Apps track text says: use Nemotron 3 Ultra for serious reasoning and Nano/Super for fast everyday calls so credits stretch. That's exactly our routing (`NEMOTRON_ESCALATE_MODEL`); say so in the write-up.
+
+Where things go on Devpost: from the hackathon page, "My projects" → create a submission. The repo URL and the hosted demo URL go in the "Try it out" links; the YouTube link goes in the video field; track and feedback are hackathon-specific questions on the same form. Save as draft early and fill it in over time. 22,000+ people have registered, so the Stage One checklist above is what separates you from most of the field.
 
 ## Architecture
 
@@ -75,6 +93,17 @@ Freshness score = (fresh + 0.5·drifted) / (fresh + drifted + rotted). Unverifie
 6. Commit early and often with real messages. The commit history is part of the submission.
 7. Don't paraphrase or lengthen the user's README pitch into marketing. Judges can smell generated READMEs; keep it specific and short.
 
+## Demo targets (verified by fetching the live READMEs on Oct 13)
+
+- **youtube-dl README** (github.com/ytdl-org/youtube-dl, ~100 KB). The best story: one of the most-starred repos on GitHub, and its README still says it "requires the Python interpreter, version 2.6, 2.7, or 3.2+", claims the project "releases at least once a month, and often weekly or even daily", and links a Microsoft Visual C++ 2010 SP1 redistributable. Paste the top ~60 lines plus the FAQ section rather than the whole options list; that keeps the run at a reasonable claim count and the hits dense.
+- **create-react-app README** (github.com/facebook/create-react-app, ~12 KB). Says "You'll need to have Node 14.0.0 or later" (Node 14 died April 2023) and links nvm at creationix/nvm. It already carries a Deprecated banner, so the angle is "even a README that says deprecated still has N stale instructions below the fold."
+- **public-apis README** (303 KB table, hundreds of herokuapp.com links). Only as a stress test for the 200-node swarm visual; expect many unverified verdicts because Tavily search can't confirm whether an API is alive.
+- Controls that should come back mostly fresh: psf/requests README (says Python 3.10+) and django-rest-framework README (Python 3.10+). A fresh result on a maintained README is as convincing as rot on a dead one; show one of each in the video.
+
+## Evaluation
+
+`eval/ground_truth.md` holds 39 world claims with dated answers (`eval/ground_truth.json` is the key: accepted statuses plus the truth). `halflife check eval/ground_truth.md --record runs/gt.jsonl && python scripts/eval.py runs/gt.jsonl` prints accuracy, wrong verdicts with the model's note, and claims the extractor skipped. The answers were written from memory as of Oct 2026 and are high-confidence, but spot-check two or three against the web before quoting a number in the submission. A 3-line "accuracy on 39 known claims" table in the README is worth more than any feature.
+
 ## Known gaps (honest list)
 
 - Model id default is unverified against the live catalog (see above).
@@ -87,9 +116,10 @@ Freshness score = (fresh + 0.5·drifted) / (fresh + drifted + rotted). Unverifie
 
 ## Roadmap to Oct 30
 
-- **By Oct 15:** keys in, model id verified, first real `halflife check examples/rotted-readme.md --record examples/runs/real.jsonl`. Look at the claims and verdicts by hand. Fix the prompts until the verdicts are ones you'd trust. This is the whole product; spend the time here.
+- **By Oct 15:** repo pushed and public with the license visible in About; Devpost draft submission created with the repo URL in "Try it out". Keys in, model id verified, first real `halflife check examples/rotted-readme.md --record examples/runs/real.jsonl`. Look at the claims and verdicts by hand. Fix the prompts until the verdicts are ones you'd trust. This is the whole product; spend the time here.
 - **By Oct 18:** UI polished against the real recording. Mobile layout checked. Annotated doc readable. Freshness score prominent.
-- **By Oct 20:** GitHub Action tested on a real PR in this repo. Screenshot of the PR comment in the README.
+- **By Oct 18, also:** ground-truth run scored; accuracy number in the README.
+- **By Oct 20:** GitHub Action tested on a real PR in this repo. Screenshot of the PR comment in the README. Hosted demo live with `HALFLIFE_PUBLIC_DEMO=1` and its URL in the Devpost draft.
 - **By Oct 22:** feature freeze. Everything end-to-end. Post the idea on Devpost's team finder if still solo; a frontend person for the swarm is the only hire worth making.
 - **Oct 23–27:** demo video (aim ~2 min: the problem in 15 seconds, paste a stale README, watch the swarm, show the annotated result, show the PR comment, state the stack). README final pass. Record a second real run on a well-known public README for the video if it demonstrates better than the example.
 - **Oct 28:** submit on Devpost with a day to spare. Fill every field. Name Nemotron, Token Factory, and Tavily explicitly in the write-up.

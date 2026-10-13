@@ -57,6 +57,31 @@ The Builder Program gives $50 Token Factory + $25 Tavily. A 200-claim run is 200
 - `TAVILY_SEARCH_DEPTH=basic` (1 credit per search instead of 2)
 - record once, replay forever
 
+## Model routing
+
+Nemotron Nano handles extraction and everyday verdicts. Set `NEMOTRON_ESCALATE_MODEL` to a bigger Nemotron (Super or Ultra) and only the verdicts Nano is unsure about (confidence below `HALFLIFE_ESCALATE_BELOW`, default 0.6) get a second opinion. Each verdict records which model decided it.
+
+## How accurate is it?
+
+`eval/ground_truth.md` is a document of 39 claims about the world with known, dated answers (end-of-life dates, deprecations, license changes, current releases). Score a run against the answer key:
+
+```bash
+halflife check eval/ground_truth.md --record runs/gt.jsonl
+python scripts/eval.py runs/gt.jsonl
+```
+
+The report gives accuracy, the wrong verdicts with the model's reasoning, and the claims the extractor missed.
+
+## Hosting the demo
+
+The hackathon requires a URL to a working, hosted demo. Run the server with the public-demo guard on so visitors can't drain the credits:
+
+```bash
+HALFLIFE_PUBLIC_DEMO=1 halflife serve --host 0.0.0.0 --port 8000 --replay examples/runs/real.jsonl
+```
+
+In this mode live runs are capped at `HALFLIFE_DEMO_MAX_CLAIMS` (40) claims and `HALFLIFE_DEMO_RUNS_PER_HOUR` (20) runs, and the recorded run is always available as a zero-cost demo.
+
 ## As a GitHub Action
 
 Drop `action/` into a workflow and halflife comments on every PR that touches your docs with what has drifted since the last edit. See [`action/README.md`](action/README.md).
